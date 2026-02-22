@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Portal Ujian SMP AT-TIBYAN</title>
+  <style>
+    :root {
+      --primary: #007bff;
+      --bg: #f4f7f6;
+    }
+    
+    /* PROTEKSI ANTI-SALIN AGRESIF */
+    * {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+      -webkit-touch-callout: none !important;
+      user-drag: none !important;
+    }
+
+    input {
+      -webkit-user-select: text !important;
+      -moz-user-select: text !important;
+      -ms-user-select: text !important;
+      user-select: text !important;
+    }
+
+    body, html { 
+      margin: 0; padding: 0; height: 100%; width: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+
+    .warning-box { 
+      background-color: #fff; 
+      border: 1px solid #ddd; padding: 30px; 
+      border-radius: 16px; width: 90%; max-width: 400px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h2 { font-size: 1.5rem; margin-bottom: 10px; color: #333; }
+    
+    .rules { 
+      text-align: left; font-size: 13px; color: #555; 
+      margin: 20px 0; background: #fff9e6; padding: 15px; 
+      border-left: 5px solid #ffcc00; border-radius: 4px;
+    }
+    
+    input { 
+      padding: 16px; width: 100%; margin: 10px 0; 
+      border: 2px solid #eee; border-radius: 10px; 
+      font-size: 16px; box-sizing: border-box;
+      text-align: center; transition: 0.3s;
+    }
+
+    input:focus { border-color: var(--primary); outline: none; }
+    
+    button { 
+      padding: 16px; background: var(--primary); color: white; 
+      border: none; border-radius: 10px; cursor: pointer; 
+      font-size: 16px; font-weight: bold; width: 100%;
+      margin-top: 10px; transition: 0.2s;
+    }
+    
+    button:hover { background: #0056b3; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    button:active { transform: scale(0.98); }
+
+    .footer-note { font-size: 11px; color: #999; margin-top: 15px; }
+    
+    #loading-state {
+      display: none;
+      font-size: 14px;
+      color: var(--primary);
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;">
+
+  <div class="warning-box">
+    <h2>SMP AT-TIBYAN</h2>
+    <p style="color: #666; font-weight: 500;">Ujian Bahasa Indonesia</p>
+    
+    <div class="rules">
+      <b>Informasi Akses:</b>
+      <ul style="padding-left: 18px; margin: 8px 0;">
+        <li>Klik tombol untuk membuka soal.</li>
+        <li>Metode <i>Direct Access</i> (Mendukung 200+ Siswa).</li>
+        <li>Dilarang menyalin (copy) teks soal.</li>
+        <li>Hanya bisa dikerjakan 1 kali.</li>
+      </ul>
+    </div>
+    
+    <input type="text" id="siswaName" placeholder="Masukkan Nama Lengkap" required autocomplete="off">
+    <button id="entryBtn">MULAI UJIAN</button>
+    <div id="loading-state">Menghubungkan ke server Google...</div>
+    <p class="footer-note">Proteksi Keamanan Aktif</p>
+  </div>
+
+  <script>
+    const targetUrl = "https://forms.gle/fGfBobE16vVTKWr79";
+
+    document.getElementById('entryBtn').addEventListener('click', function() {
+      const name = document.getElementById('siswaName').value.trim();
+      if (!name) {
+        alert("Nama wajib diisi!");
+        return;
+      }
+
+      // Mencegah double klik saat traffic tinggi
+      const btn = document.getElementById('entryBtn');
+      btn.disabled = true;
+      btn.innerText = "MENGALIHKAN...";
+      document.getElementById('loading-state').style.display = "block";
+
+      // Redirect langsung ke Google Form
+      window.location.replace(targetUrl);
+    });
+
+    // Proteksi keyboard
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 65)) {
+        e.preventDefault();
+        return false;
+      }
+      if (e.keyCode === 123) { e.preventDefault(); return false; }
+    });
+  </script>
+</body>
+</html>
