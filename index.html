@@ -11,13 +11,13 @@
       --bg: #f4f7f6;
     }
     
-    /* Proteksi Salin Total */
     * {
       -webkit-user-select: none !important;
       -moz-user-select: none !important;
       -ms-user-select: none !important;
       user-select: none !important;
       -webkit-touch-callout: none !important;
+      touch-action: pan-y;
     }
 
     body, html { 
@@ -27,7 +27,6 @@
       overflow: hidden;
     }
 
-    /* Overlay Awal */
     #start-screen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: white; z-index: 1000;
@@ -51,10 +50,9 @@
     button {
       width: 100%; padding: 15px; background: var(--primary); color: white;
       border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
-      cursor: pointer; transition: 0.2s;
+      cursor: pointer;
     }
 
-    /* Container Soal */
     #exam-container {
       display: none; width: 100%; height: 100%; background: white;
     }
@@ -63,10 +61,9 @@
       width: 100%; height: 100%; border: none;
     }
 
-    /* Modal Peringatan Curang */
     #warning-modal {
       display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9); z-index: 2000;
+      background: rgba(0,0,0,0.98); z-index: 10000;
       color: white; flex-direction: column; align-items: center; justify-content: center;
       text-align: center; padding: 20px;
     }
@@ -78,103 +75,86 @@
 </head>
 <body oncontextmenu="return false;">
 
-  <!-- Layar Mulai -->
   <div id="start-screen">
     <div class="card">
       <h2>SMP AT-TIBYAN</h2>
       <p>Mata Pelajaran: <b>Bahasa Indonesia</b></p>
-      <div style="text-align: left; font-size: 12px; background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
-        <b>Aturan Anti-Curang:</b><br>
-        - Jangan meninggalkan halaman ini.<br>
-        - Jangan mencoba ganti aplikasi/tab.<br>
-        - Klik kanan & Copy dimatikan.
-      </div>
       <input type="text" id="siswaName" placeholder="Masukkan Nama Lengkap" autocomplete="off">
       <button onclick="startExam()">MASUK KE SOAL</button>
     </div>
   </div>
 
-  <!-- Layar Ujian -->
   <div id="exam-container">
     <iframe id="exam-frame" src=""></iframe>
   </div>
 
-  <!-- Modal Peringatan -->
   <div id="warning-modal">
     <div class="warning-content">
       <h1>⚠️ PELANGGARAN!</h1>
-      <p id="warn-msg">Anda terdeteksi mencoba meninggalkan halaman ujian.</p>
-      <button style="background: white; color: black;" onclick="closeWarning()">SAYA MENGERTI</button>
+      <p id="warn-msg">Jangan tinggalkan halaman ujian!</p>
+      <button style="background: white; color: black; margin-top: 10px;" onclick="closeWarning()">SAYA MENGERTI</button>
     </div>
   </div>
 
   <script>
-    // URL Google Form Anda
     const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdvvFm250u2_o66t0071zN0fG3m6Y6_8_xV4S_T0M8X5v8g-A/viewform?embedded=true";
-    
     let violationCount = 0;
+    let isExamStarted = false;
+    let isWarningActive = false;
 
     function startExam() {
       const name = document.getElementById('siswaName').value.trim();
-      if (!name) {
-        alert("Nama wajib diisi!");
-        return;
-      }
+      if (!name) { alert("Nama wajib diisi!"); return; }
 
-      // Aktifkan Mode Fullscreen (Beberapa browser mobile mungkin memblokir)
       if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen();
       }
 
-      // Tampilkan Soal
       document.getElementById('start-screen').style.display = 'none';
       document.getElementById('exam-container').style.display = 'block';
-      
-      // Load Iframe dengan teknik Cache Bypass untuk menghindari error Multiple Account
-      const frame = document.getElementById('exam-frame');
-      frame.src = googleFormUrl + "&id=" + new Date().getTime(); 
+      document.getElementById('exam-frame').src = googleFormUrl;
 
-      // Mulai Pengawasan
-      initSecurity();
+      isExamStarted = true;
     }
 
-    function initSecurity() {
-      // 1. Deteksi Ganti Tab / Keluar Browser
-      window.onblur = function() {
-        violationCount++;
-        showWarning("Peringatan ke-" + violationCount + ": Jangan tinggalkan halaman ujian!");
-      };
+    // Deteksi Tab Visibility (Paling Akurat untuk GitHub Pages)
+    document.addEventListener("visibilitychange", function() {
+      if (document.hidden && isExamStarted && !isWarningActive) {
+        triggerViolation("Pelanggaran: Anda terdeteksi keluar dari browser!");
+      }
+    });
 
-      // 2. Deteksi Visibilitas
-      document.addEventListener("visibilitychange", function() {
-        if (document.hidden) {
-          violationCount++;
-          showWarning("Anda terdeteksi membuka aplikasi lain!");
-        }
-      });
+    // Deteksi Blur (Jika pindah aplikasi atau tarik notifikasi)
+    window.onblur = function() {
+      if (isExamStarted && !isWarningActive) {
+        // Beri jeda sedikit untuk menghindari salah deteksi saat klik di dalam Iframe
+        setTimeout(() => {
+          if (!document.hasFocus()) {
+             triggerViolation("Peringatan: Jangan membuka menu lain atau aplikasi lain!");
+          }
+        }, 500);
+      }
+    };
 
-      // 3. Blokir Keyboard
-      document.onkeydown = function(e) {
-        // Blokir Ctrl+C, V, U, S, A, Tab, Alt
-        if (e.ctrlKey || e.altKey || e.keyCode === 9 || e.keyCode === 123) {
-          e.preventDefault();
-          return false;
-        }
-      };
-    }
-
-    function showWarning(msg) {
-      document.getElementById('warn-msg').innerText = msg;
-      document.getElementById('warning-modal').style.display = 'flex';
+    function triggerViolation(msg) {
+      violationCount++;
+      isWarningActive = true;
+      const modal = document.getElementById('warning-modal');
+      const msgElem = document.getElementById('warn-msg');
+      msgElem.innerHTML = `<b>${msg}</b><br><br>Total Pelanggaran: ${violationCount}`;
+      modal.style.display = 'flex';
     }
 
     function closeWarning() {
+      isWarningActive = false;
       document.getElementById('warning-modal').style.display = 'none';
+      window.focus();
     }
 
-    // Blokir Inspect Element & Seleksi
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.addEventListener('selectstart', e => e.preventDefault());
+    // Proteksi tambahan
+    window.onbeforeunload = function() {
+      if(isExamStarted) return "Proses ujian akan hilang!";
+    };
   </script>
 </body>
 </html>
