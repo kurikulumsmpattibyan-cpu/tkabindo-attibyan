@@ -7,133 +7,174 @@
   <style>
     :root {
       --primary: #007bff;
+      --danger: #dc3545;
       --bg: #f4f7f6;
     }
     
-    /* PROTEKSI ANTI-SALIN AGRESIF */
+    /* Proteksi Salin Total */
     * {
       -webkit-user-select: none !important;
       -moz-user-select: none !important;
       -ms-user-select: none !important;
       user-select: none !important;
       -webkit-touch-callout: none !important;
-      user-drag: none !important;
-    }
-
-    input {
-      -webkit-user-select: text !important;
-      -moz-user-select: text !important;
-      -ms-user-select: text !important;
-      user-select: text !important;
     }
 
     body, html { 
       margin: 0; padding: 0; height: 100%; width: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: sans-serif;
       background: var(--bg);
-      display: flex; align-items: center; justify-content: center;
       overflow: hidden;
     }
 
-    .warning-box { 
-      background-color: #fff; 
-      border: 1px solid #ddd; padding: 30px; 
-      border-radius: 16px; width: 90%; max-width: 400px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      text-align: center;
+    /* Overlay Awal */
+    #start-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: white; z-index: 1000;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px; box-sizing: border-box; text-align: center;
     }
 
-    h2 { font-size: 1.5rem; margin-bottom: 10px; color: #333; }
-    
-    .rules { 
-      text-align: left; font-size: 13px; color: #555; 
-      margin: 20px 0; background: #fff9e6; padding: 15px; 
-      border-left: 5px solid #ffcc00; border-radius: 4px;
-    }
-    
-    input { 
-      padding: 16px; width: 100%; margin: 10px 0; 
-      border: 2px solid #eee; border-radius: 10px; 
-      font-size: 16px; box-sizing: border-box;
-      text-align: center; transition: 0.3s;
+    .card {
+      background: white; padding: 30px; border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid #ddd;
+      max-width: 400px; width: 100%;
     }
 
-    input:focus { border-color: var(--primary); outline: none; }
-    
-    button { 
-      padding: 16px; background: var(--primary); color: white; 
-      border: none; border-radius: 10px; cursor: pointer; 
-      font-size: 16px; font-weight: bold; width: 100%;
-      margin-top: 10px; transition: 0.2s;
+    input {
+      width: 100%; padding: 15px; margin: 15px 0;
+      border: 2px solid #eee; border-radius: 8px; font-size: 16px;
+      box-sizing: border-box; text-align: center;
+      -webkit-user-select: text !important; user-select: text !important;
     }
-    
-    button:hover { background: #0056b3; }
-    button:disabled { background: #ccc; cursor: not-allowed; }
-    button:active { transform: scale(0.98); }
 
-    .footer-note { font-size: 11px; color: #999; margin-top: 15px; }
-    
-    #loading-state {
-      display: none;
-      font-size: 14px;
-      color: var(--primary);
-      margin-top: 10px;
-      font-weight: bold;
+    button {
+      width: 100%; padding: 15px; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
+      cursor: pointer; transition: 0.2s;
+    }
+
+    /* Container Soal */
+    #exam-container {
+      display: none; width: 100%; height: 100%; background: white;
+    }
+
+    iframe {
+      width: 100%; height: 100%; border: none;
+    }
+
+    /* Modal Peringatan Curang */
+    #warning-modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9); z-index: 2000;
+      color: white; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 20px;
+    }
+
+    .warning-content {
+      background: var(--danger); padding: 30px; border-radius: 15px; max-width: 400px;
     }
   </style>
 </head>
-<body oncontextmenu="return false;" onselectstart="return false;" ondragstart="return false;">
+<body oncontextmenu="return false;">
 
-  <div class="warning-box">
-    <h2>SMP AT-TIBYAN</h2>
-    <p style="color: #666; font-weight: 500;">Ujian Bahasa Indonesia</p>
-    
-    <div class="rules">
-      <b>Informasi Akses:</b>
-      <ul style="padding-left: 18px; margin: 8px 0;">
-        <li>Klik tombol untuk membuka soal.</li>
-        <li>Metode <i>Direct Access</i> (Mendukung 200+ Siswa).</li>
-        <li>Dilarang menyalin (copy) teks soal.</li>
-        <li>Hanya bisa dikerjakan 1 kali.</li>
-      </ul>
+  <!-- Layar Mulai -->
+  <div id="start-screen">
+    <div class="card">
+      <h2>SMP AT-TIBYAN</h2>
+      <p>Mata Pelajaran: <b>Bahasa Indonesia</b></p>
+      <div style="text-align: left; font-size: 12px; background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+        <b>Aturan Anti-Curang:</b><br>
+        - Jangan meninggalkan halaman ini.<br>
+        - Jangan mencoba ganti aplikasi/tab.<br>
+        - Klik kanan & Copy dimatikan.
+      </div>
+      <input type="text" id="siswaName" placeholder="Masukkan Nama Lengkap" autocomplete="off">
+      <button onclick="startExam()">MASUK KE SOAL</button>
     </div>
-    
-    <input type="text" id="siswaName" placeholder="Masukkan Nama Lengkap" required autocomplete="off">
-    <button id="entryBtn">MULAI UJIAN</button>
-    <div id="loading-state">Menghubungkan ke server Google...</div>
-    <p class="footer-note">Proteksi Keamanan Aktif</p>
+  </div>
+
+  <!-- Layar Ujian -->
+  <div id="exam-container">
+    <iframe id="exam-frame" src=""></iframe>
+  </div>
+
+  <!-- Modal Peringatan -->
+  <div id="warning-modal">
+    <div class="warning-content">
+      <h1>⚠️ PELANGGARAN!</h1>
+      <p id="warn-msg">Anda terdeteksi mencoba meninggalkan halaman ujian.</p>
+      <button style="background: white; color: black;" onclick="closeWarning()">SAYA MENGERTI</button>
+    </div>
   </div>
 
   <script>
-    const targetUrl = "https://forms.gle/fGfBobE16vVTKWr79";
+    // URL Google Form Anda
+    const googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdvvFm250u2_o66t0071zN0fG3m6Y6_8_xV4S_T0M8X5v8g-A/viewform?embedded=true";
+    
+    let violationCount = 0;
 
-    document.getElementById('entryBtn').addEventListener('click', function() {
+    function startExam() {
       const name = document.getElementById('siswaName').value.trim();
       if (!name) {
         alert("Nama wajib diisi!");
         return;
       }
 
-      // Mencegah double klik saat traffic tinggi
-      const btn = document.getElementById('entryBtn');
-      btn.disabled = true;
-      btn.innerText = "MENGALIHKAN...";
-      document.getElementById('loading-state').style.display = "block";
-
-      // Redirect langsung ke Google Form
-      window.location.replace(targetUrl);
-    });
-
-    // Proteksi keyboard
-    document.addEventListener('keydown', function(e) {
-      if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 65)) {
-        e.preventDefault();
-        return false;
+      // Aktifkan Mode Fullscreen (Beberapa browser mobile mungkin memblokir)
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
       }
-      if (e.keyCode === 123) { e.preventDefault(); return false; }
-    });
+
+      // Tampilkan Soal
+      document.getElementById('start-screen').style.display = 'none';
+      document.getElementById('exam-container').style.display = 'block';
+      
+      // Load Iframe dengan teknik Cache Bypass untuk menghindari error Multiple Account
+      const frame = document.getElementById('exam-frame');
+      frame.src = googleFormUrl + "&id=" + new Date().getTime(); 
+
+      // Mulai Pengawasan
+      initSecurity();
+    }
+
+    function initSecurity() {
+      // 1. Deteksi Ganti Tab / Keluar Browser
+      window.onblur = function() {
+        violationCount++;
+        showWarning("Peringatan ke-" + violationCount + ": Jangan tinggalkan halaman ujian!");
+      };
+
+      // 2. Deteksi Visibilitas
+      document.addEventListener("visibilitychange", function() {
+        if (document.hidden) {
+          violationCount++;
+          showWarning("Anda terdeteksi membuka aplikasi lain!");
+        }
+      });
+
+      // 3. Blokir Keyboard
+      document.onkeydown = function(e) {
+        // Blokir Ctrl+C, V, U, S, A, Tab, Alt
+        if (e.ctrlKey || e.altKey || e.keyCode === 9 || e.keyCode === 123) {
+          e.preventDefault();
+          return false;
+        }
+      };
+    }
+
+    function showWarning(msg) {
+      document.getElementById('warn-msg').innerText = msg;
+      document.getElementById('warning-modal').style.display = 'flex';
+    }
+
+    function closeWarning() {
+      document.getElementById('warning-modal').style.display = 'none';
+    }
+
+    // Blokir Inspect Element & Seleksi
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('selectstart', e => e.preventDefault());
   </script>
 </body>
-
-  
 </html>
